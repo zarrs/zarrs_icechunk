@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Bump MSRV to 1.85 to match `icechunk` (v0.2.8)
+
 ## [0.2.1] - 2025-03-10
 
 ### Fixed

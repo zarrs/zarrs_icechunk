@@ -1,5 +1,9 @@
 //! [`icechunk`] store support for the [`zarrs`](https://docs.rs/zarrs/latest/zarrs/index.html) crate.
 //!
+//! Icechunk is a transactional store that enables `git`-like version control of Zarr hierarchies.
+//!
+//! `zarrs_icechunk` can read data in a range of archival formats (e.g., [`netCDF4`](https://www.unidata.ucar.edu/software/netcdf/), [`HDF5`](https://www.hdfgroup.org/solutions/hdf5/), etc.) that are converted to `icechunk`-backed "virtual Zarr datacubes" via [`VirtualiZarr`](https://github.com/zarr-developers/VirtualiZarr).
+//!
 //! ```
 //! # use std::sync::Arc;
 //! # use zarrs_storage::{AsyncWritableStorageTraits, StoreKey};
