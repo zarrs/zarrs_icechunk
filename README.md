@@ -10,8 +10,13 @@
 
 Icechunk is a transactional store that enables `git`-like version control of Zarr hierarchies.
 
-`zarrs_icechunk` can read data in a range of archival formats (e.g., [`netCDF4`](https://www.unidata.ucar.edu/software/netcdf/), [`HDF5`](https://www.hdfgroup.org/solutions/hdf5/), etc.) that are converted to `icechunk`-backed "virtual Zarr datacubes" via [`VirtualiZarr`](https://github.com/zarr-developers/VirtualiZarr).
+`zarrs_icechunk` can read data in a range of archival formats (e.g., [`netCDF4`](https://www.unidata.ucar.edu/software/netcdf/), [`HDF5`](https://www.hdfgroup.org/solutions/hdf5/), etc.) that are converted to `icechunk`-backed "virtual Zarr datacubes" via [`VirtualiZarr`](https://github.com/zarr-developers/VirtualiZarr) (example below).
 
+## Version Compatibility Matrix
+See [doc/version_compatibility_matrix.md](./doc/version_compatibility_matrix.md).
+
+## Examples
+### Basic Usage and Version Control
 ```rust
 use icechunk::{Repository, RepositoryConfig, repository::VersionInfo};
 use zarrs_icechunk::AsyncIcechunkStore;
@@ -39,16 +44,13 @@ let store = Arc::new(AsyncIcechunkStore::new(session));
 let array: Array<AsyncIcechunkStore> = ...;
 ```
 
-## Version Compatibility Matrix
-See [doc/version_compatibility_matrix.md](./doc/version_compatibility_matrix.md).
-
-## Examples
 ### Virtualise NetCDF as Zarr (via [`VirtualiZarr`](https://github.com/zarr-developers/VirtualiZarr))
-Create a virtual `Zarr` image of `examples/data/test[0,1].nc`
+Decode a virtual Zarr array [`/examples/data/test.icechunk.zarr`]:
 ```bash
-./examples/virtualizarr_netcdf.py # --> `examples/data/test.icechunk.zarr`
 cargo run --example virtualizarr_netcdf
 ```
+This references `examples/data/test[0,1].nc` hosted in this repository over HTTP.
+[`/examples/data/test.icechunk.zarr`] was created with [`/examples/virtualizarr_netcdf.py`](./examples/virtualizarr_netcdf.py).
 
 ## Licence
 `zarrs_icechunk` is licensed under either of
@@ -56,3 +58,6 @@ cargo run --example virtualizarr_netcdf
  - the MIT license [LICENSE-MIT](./LICENCE-MIT) or <http://opensource.org/licenses/MIT>, at your option.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
+
+
+[`/examples/data/test.icechunk.zarr`]: ./examples/data/test.icechunk.zarr

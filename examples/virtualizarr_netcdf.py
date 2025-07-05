@@ -6,8 +6,8 @@
 #     "icechunk==0.2.18",
 #     "virtualizarr==1.3.2",
 #     "h5netcdf==1.6.3",
-#     # "aiohttp==3.12.13",
-#     # "requests==2.32.4",
+#     "aiohttp==3.12.13",
+#     "requests==2.32.4",
 # ]
 # ///
 
@@ -18,10 +18,10 @@ import icechunk
 from virtualizarr import open_virtual_dataset
 
 vds = [
-    open_virtual_dataset('examples/data/test0.nc'),
-    open_virtual_dataset('examples/data/test1.nc'),
-    # open_virtual_dataset('https://github.com/LDeakin/zarrs_icechunk/raw/refs/heads/virtualizarr_example/examples/data/test0.nc'),
-    # open_virtual_dataset('https://github.com/LDeakin/zarrs_icechunk/raw/refs/heads/virtualizarr_example/examples/data/test1.nc'),
+    # open_virtual_dataset('examples/data/test0.nc'),
+    # open_virtual_dataset('examples/data/test1.nc'),
+    open_virtual_dataset('https://github.com/zarrs/zarrs_icechunk/raw/refs/heads/main/examples/data/test0.nc'),
+    open_virtual_dataset('https://github.com/zarrs/zarrs_icechunk/raw/refs/heads/main/examples/data/test1.nc'),
 ]
 combined_vds = xr.concat(vds, dim='z', coords='minimal', compat='override')
 

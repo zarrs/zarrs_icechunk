@@ -24,4 +24,4 @@ Cargo.lock
 *.profraw
 lcov.info
 
-examples/data/test.icechunk.zarr
+# examples/data/test.icechunk.zarr
