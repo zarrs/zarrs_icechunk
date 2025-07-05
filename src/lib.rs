@@ -2,8 +2,14 @@
 //!
 //! Icechunk is a transactional store that enables `git`-like version control of Zarr hierarchies.
 //!
-//! `zarrs_icechunk` can read data in a range of archival formats (e.g., [`netCDF4`](https://www.unidata.ucar.edu/software/netcdf/), [`HDF5`](https://www.hdfgroup.org/solutions/hdf5/), etc.) that are converted to `icechunk`-backed "virtual Zarr datacubes" via [`VirtualiZarr`](https://github.com/zarr-developers/VirtualiZarr).
+//! `zarrs_icechunk` can read data in a range of archival formats (e.g., [`netCDF4`](https://www.unidata.ucar.edu/software/netcdf/), [`HDF5`](https://www.hdfgroup.org/solutions/hdf5/), etc.) that are converted to `icechunk`-backed "virtual Zarr datacubes" via [`VirtualiZarr`](https://github.com/zarr-developers/VirtualiZarr) (example below).
 //!
+//! ## Version Compatibility Matrix
+//!
+#![doc = include_str!("../doc/version_compatibility_matrix.md")]
+//!
+//! ## Examples
+//! ### Basic Usage and Version Control
 //! ```
 //! # use std::sync::Arc;
 //! # use zarrs_storage::{AsyncWritableStorageTraits, StoreKey};
@@ -37,14 +43,20 @@
 //! # }).unwrap();
 //! ```
 //!
-//! ## Version Compatibility Matrix
-//!
-#![doc = include_str!("../doc/version_compatibility_matrix.md")]
+//! ### Virtualise NetCDF as Zarr (via [`VirtualiZarr`](https://github.com/zarr-developers/VirtualiZarr))
+//! Decode a virtual Zarr array [`/examples/data/test.icechunk.zarr`]:
+//! ```bash
+//! cargo run --example virtualizarr_netcdf
+//! ```
+//! This references `/examples/data/test[0,1].nc` hosted in this repository over HTTP.
+//! [`/examples/data/test.icechunk.zarr`] was created with [`/examples/virtualizarr_netcdf.py`](https://github.com/zarrs/zarrs_icechunk/blob/main/examples/virtualizarr_netcdf.py).
 //!
 //! ## Licence
 //! `zarrs_icechunk` is licensed under either of
 //! - the Apache License, Version 2.0 [LICENSE-APACHE](https://docs.rs/crate/zarrs_icechunk/latest/source/LICENCE-APACHE) or <http://www.apache.org/licenses/LICENSE-2.0> or
 //! - the MIT license [LICENSE-MIT](https://docs.rs/crate/zarrs_icechunk/latest/source/LICENCE-MIT) or <http://opensource.org/licenses/MIT>, at your option.
+//!
+//! [`/examples/data/test.icechunk.zarr`]: https://github.com/zarrs/zarrs_icechunk/tree/main/examples/data/test.icechunk.zarr
 
 use std::sync::Arc;
 

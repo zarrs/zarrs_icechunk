@@ -49,7 +49,7 @@ Decode a virtual Zarr array [`/examples/data/test.icechunk.zarr`]:
 ```bash
 cargo run --example virtualizarr_netcdf
 ```
-This references `examples/data/test[0,1].nc` hosted in this repository over HTTP.
+This references `/examples/data/test[0,1].nc` hosted in this repository over HTTP.
 [`/examples/data/test.icechunk.zarr`] was created with [`/examples/virtualizarr_netcdf.py`](./examples/virtualizarr_netcdf.py).
 
 ## Licence
