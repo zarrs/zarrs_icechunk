@@ -42,6 +42,14 @@ let array: Array<AsyncIcechunkStore> = ...;
 ## Version Compatibility Matrix
 See [doc/version_compatibility_matrix.md](./doc/version_compatibility_matrix.md).
 
+## Examples
+### Virtualise NetCDF as Zarr (via [`VirtualiZarr`](https://github.com/zarr-developers/VirtualiZarr))
+Create a virtual `Zarr` image of `examples/data/test[0,1].nc`
+```bash
+./examples/virtualizarr_netcdf.py # --> `examples/data/test.icechunk.zarr`
+cargo run --example virtualizarr_netcdf
+```
+
 ## Licence
 `zarrs_icechunk` is licensed under either of
  - the Apache License, Version 2.0 [LICENSE-APACHE](./LICENCE-APACHE) or <http://www.apache.org/licenses/LICENSE-2.0> or
