@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add a `Virtualizarr` `NetCDF` example
+
 ### Changed
 - Bump MSRV to 1.85 to match `icechunk` (v0.2.8)
 
