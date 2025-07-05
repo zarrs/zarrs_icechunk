@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2025-07-05
+
 ### Added
 - Add a `Virtualizarr` `NetCDF` example
 
@@ -66,7 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial release
 
-[unreleased]: https://github.com/LDeakin/zarrs_icechunk/compare/v0.2.1...HEAD
+[unreleased]: https://github.com/LDeakin/zarrs_icechunk/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/LDeakin/zarrs_icechunk/releases/tag/v0.2.2
 [0.2.1]: https://github.com/LDeakin/zarrs_icechunk/releases/tag/v0.2.1
 [0.2.0]: https://github.com/LDeakin/zarrs_icechunk/releases/tag/v0.2.0
 [0.1.1]: https://github.com/LDeakin/zarrs_icechunk/releases/tag/v0.1.1
