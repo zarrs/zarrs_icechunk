@@ -29,4 +29,9 @@ fmt:
 clean:
 	cargo clean
 
+example_virtualizarr_netcdf:
+	rm -r examples/data/test.icechunk.zarr || true
+	./examples/virtualizarr_netcdf.py
+	cargo run --example virtualizarr_netcdf
+
 .PHONY: all build test doc clippy check fmt clean

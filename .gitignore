@@ -23,3 +23,5 @@ Cargo.lock
 # Profiling files
 *.profraw
 lcov.info
+
+examples/data/test.icechunk.zarr
