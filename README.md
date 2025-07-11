@@ -1,7 +1,7 @@
 # zarrs_icechunk
 
 [![Latest Version](https://img.shields.io/crates/v/zarrs_icechunk.svg)](https://crates.io/crates/zarrs_icechunk)
-[![icechunk 0.2](https://img.shields.io/badge/icechunk-0.2-blue)](https://crates.io/crates/icechunk)
+[![icechunk 0.3](https://img.shields.io/badge/icechunk-0.3-blue)](https://crates.io/crates/icechunk)
 [![zarrs_icechunk documentation](https://docs.rs/zarrs_icechunk/badge.svg)](https://docs.rs/zarrs_icechunk)
 ![msrv](https://img.shields.io/crates/msrv/zarrs_icechunk)
 [![build](https://github.com/LDeakin/zarrs_icechunk/actions/workflows/ci.yml/badge.svg)](https://github.com/LDeakin/zarrs_icechunk/actions/workflows/ci.yml)

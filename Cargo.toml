@@ -1,6 +1,6 @@
 [package]
 name = "zarrs_icechunk"
-version = "0.2.2"
+version = "0.3.0"
 authors = ["Lachlan Deakin <ljdgit@gmail.com>"]
 edition = "2021"
 rust-version = "1.85"
@@ -15,7 +15,7 @@ categories = ["encoding"]
 [dependencies]
 async-trait = "0.1.74"
 futures = "0.3.29"
-icechunk = "0.2.0"
+icechunk = "0.3.0"
 tokio = "1.34.0"
 zarrs_storage = { version = "0.3.4", features = ["async"] }
 
