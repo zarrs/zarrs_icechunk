@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add trusted publishing
+
 ### Changed
 - Bump MSRV to 1.86 in alignment with `icechunk` `aws` dependencies
 - Update example to use `virtualizarr` 2.0 / `icechunk` 1.0
