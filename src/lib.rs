@@ -190,10 +190,14 @@ impl AsyncReadableStorageTraits for AsyncIcechunkStore {
         }
     }
 
-    // NOTE: this does not not differentiate between not found and empty
+    // NOTE: this does not differentiate between not found and empty
     async fn size_key(&self, key: &StoreKey) -> Result<Option<u64>, StorageError> {
         let key = key.to_string();
         handle_result(self.store().await.getsize(&key).await).map(Some)
+    }
+
+    fn supports_get_partial(&self) -> bool {
+        true
     }
 }
 
@@ -257,6 +261,10 @@ impl AsyncWritableStorageTraits for AsyncIcechunkStore {
                 "the store does not support deletion".to_string(),
             ))
         }
+    }
+
+    fn supports_set_partial(&self) -> bool {
+        false
     }
 }
 
