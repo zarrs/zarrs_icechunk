@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Breaking**: bump `zarrs_storage` to 0.4.0
 
+### Fixed
+- Make `virtualizarr_netcdf` compatible with `icechunk` 1.1.0+
+
 ## [0.3.1] - 2025-07-22
 
 ### Added
