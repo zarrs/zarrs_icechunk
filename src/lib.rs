@@ -65,8 +65,9 @@ pub use icechunk;
 
 use tokio::sync::RwLock;
 use zarrs_storage::{
-    byte_range::ByteRange, AsyncBytes, AsyncListableStorageTraits, AsyncReadableStorageTraits,
-    AsyncWritableStorageTraits, MaybeAsyncBytes, StorageError, StoreKey, StoreKeyOffsetValue,
+    byte_range::{ByteRange, ByteRangeIterator},
+    AsyncListableStorageTraits, AsyncMaybeBytesIterator, AsyncReadableStorageTraits,
+    AsyncWritableStorageTraits, Bytes, MaybeBytes, OffsetBytesIterator, StorageError, StoreKey,
     StoreKeys, StoreKeysPrefixes, StorePrefix,
 };
 
@@ -149,7 +150,7 @@ impl AsyncIcechunkStore {
 
 #[async_trait::async_trait]
 impl AsyncReadableStorageTraits for AsyncIcechunkStore {
-    async fn get(&self, key: &StoreKey) -> Result<MaybeAsyncBytes, StorageError> {
+    async fn get(&self, key: &StoreKey) -> Result<MaybeBytes, StorageError> {
         handle_result_notfound(
             self.store()
                 .await
@@ -158,48 +159,59 @@ impl AsyncReadableStorageTraits for AsyncIcechunkStore {
         )
     }
 
-    async fn get_partial_values_key(
-        &self,
+    async fn get_partial_many<'a>(
+        &'a self,
         key: &StoreKey,
-        byte_ranges: &[ByteRange],
-    ) -> Result<Option<Vec<AsyncBytes>>, StorageError> {
+        byte_ranges: ByteRangeIterator<'a>,
+    ) -> Result<AsyncMaybeBytesIterator<'a>, StorageError> {
         let byte_ranges: Vec<_> = byte_ranges
-            .iter()
             .map(|byte_range| {
                 let key = key.to_string();
                 let byte_range = match byte_range {
                     ByteRange::FromStart(offset, None) => {
-                        icechunk::format::ByteRange::from_offset(*offset)
+                        icechunk::format::ByteRange::from_offset(offset)
                     }
                     ByteRange::FromStart(offset, Some(length)) => {
-                        icechunk::format::ByteRange::from_offset_with_length(*offset, *length)
+                        icechunk::format::ByteRange::from_offset_with_length(offset, length)
                     }
-                    ByteRange::Suffix(length) => icechunk::format::ByteRange::Last(*length),
+                    ByteRange::Suffix(length) => icechunk::format::ByteRange::Last(length),
                 };
                 (key, byte_range)
             })
             .collect();
-        let result = handle_result(self.store().await.get_partial_values(byte_ranges).await)?;
-        result.into_iter().map(handle_result_notfound).collect()
+        let result =
+            handle_result_notfound(self.store().await.get_partial_values(byte_ranges).await)?;
+        if let Some(result) = result {
+            Ok(Some(
+                futures::stream::iter(result.into_iter().map(handle_result)).boxed(),
+            ))
+        } else {
+            Ok(None)
+        }
     }
 
-    // NOTE: this does not not differentiate between not found and empty
+    // NOTE: this does not differentiate between not found and empty
     async fn size_key(&self, key: &StoreKey) -> Result<Option<u64>, StorageError> {
         let key = key.to_string();
         handle_result(self.store().await.getsize(&key).await).map(Some)
+    }
+
+    fn supports_get_partial(&self) -> bool {
+        true
     }
 }
 
 #[async_trait::async_trait]
 impl AsyncWritableStorageTraits for AsyncIcechunkStore {
-    async fn set(&self, key: &StoreKey, value: AsyncBytes) -> Result<(), StorageError> {
+    async fn set(&self, key: &StoreKey, value: Bytes) -> Result<(), StorageError> {
         handle_result(self.store().await.set(key.as_str(), value).await)?;
         Ok(())
     }
 
-    async fn set_partial_values(
-        &self,
-        _key_start_values: &[StoreKeyOffsetValue],
+    async fn set_partial_many<'a>(
+        &'a self,
+        _key: &StoreKey,
+        _offset_values: OffsetBytesIterator<'a>,
     ) -> Result<(), StorageError> {
         if self
             .store()
@@ -249,6 +261,10 @@ impl AsyncWritableStorageTraits for AsyncIcechunkStore {
                 "the store does not support deletion".to_string(),
             ))
         }
+    }
+
+    fn supports_set_partial(&self) -> bool {
+        false
     }
 }
 

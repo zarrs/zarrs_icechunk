@@ -16,8 +16,8 @@ async fn icechunk_array() -> Result<(), Box<dyn std::error::Error>> {
     let array_path = "/array";
     let mut builder = ArrayBuilder::new(
         vec![4, 4], // array shape
+        vec![2, 2], // regular chunk shape
         DataType::UInt8,
-        vec![2, 2].try_into().unwrap(), // regular chunk shape
         FillValue::from(0u8),
     );
     builder.bytes_to_bytes_codecs(vec![]);
@@ -43,7 +43,7 @@ async fn icechunk_array() -> Result<(), Box<dyn std::error::Error>> {
         array.chunk_shape(&[0, 0]).unwrap(),
         [2, 2].try_into().unwrap()
     );
-    assert_eq!(array.chunk_grid_shape().unwrap(), &[2, 2]);
+    assert_eq!(array.chunk_grid_shape(), &[2, 2]);
 
     // 1  2 | 0  0
     // 0  0 | 0  0
