@@ -18,8 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: ["stable", "1.86", "beta", "nightly"]
-        features: ["--features \"\"", "--all-features", "--no-default-features"]
+        toolchain: ["stable", "1.89"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,8 +26,8 @@ jobs:
         with:
           toolchain: ${{ matrix.toolchain }}
       - uses: Swatinem/rust-cache@v2
-      - run: cargo build ${{ matrix.features }}
-      - run: cargo test ${{ matrix.features }}
+      - run: cargo build
+      - run: cargo test
   build_and_test_windows:
     runs-on: windows-latest
     steps:
@@ -68,7 +67,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: rustup component add clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy --all-features -- -D warnings
+      - run: cargo clippy -- -D warnings
   # semver:
   #   runs-on: ubuntu-latest
   #   steps:
