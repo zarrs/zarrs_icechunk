@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Bump MSRV to 1.89 in alignment with `icechunk` 0.3.10
 
+### Fixed
+- Fix `AsyncIcechunkStore::list_dir()` which returned keys/prefixes without the parent prefix
+
 ## [0.4.0] - 2025-09-19
 
 ### Changed
