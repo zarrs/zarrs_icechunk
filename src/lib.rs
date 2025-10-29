@@ -309,10 +309,14 @@ impl AsyncListableStorageTraits for AsyncIcechunkStore {
             .map(|item| {
                 match item? {
                     icechunk::store::ListDirItem::Key(key) => {
-                        keys.push(StoreKey::new(&key)?);
+                        keys.push(StoreKey::new(format!("{}{}", prefix.as_str(), &key))?);
                     }
-                    icechunk::store::ListDirItem::Prefix(prefix) => {
-                        prefixes.push(StorePrefix::new(prefix + "/")?);
+                    icechunk::store::ListDirItem::Prefix(prefix_inner) => {
+                        prefixes.push(StorePrefix::new(format!(
+                            "{}{}/",
+                            prefix.as_str(),
+                            &prefix_inner
+                        ))?);
                     }
                 }
                 Ok::<_, StorageError>(())
@@ -423,6 +427,191 @@ mod tests {
             .await?;
         let store = AsyncIcechunkStore::new(session);
         assert_eq!(store.get(&root_json).await?, Some(json.clone().into()));
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn list_dir_and_list_prefix_nested() -> Result<(), Box<dyn Error>> {
+        // Create an icechunk repository with a deeply nested zarr hierarchy
+        let storage = icechunk::new_in_memory_storage().await?;
+        let config = RepositoryConfig::default();
+        let repo = Repository::create(Some(config), storage, HashMap::new()).await?;
+        let store = AsyncIcechunkStore::new(repo.writable_session("main").await?);
+
+        let group_json = r#"{"zarr_format":3,"node_type":"group"}"#;
+        let array_json = r#"{"zarr_format":3,"node_type":"array","shape":[10, 10],"data_type":"int32","chunk_grid":{"name":"regular","configuration":{"chunk_shape":[5, 5]}},"chunk_key_encoding":{"name":"default","configuration":{"separator":"/"}},"fill_value":0,"codecs":[{"name":"bytes","configuration":{"endian":"little"}}]}"#;
+
+        // Create a deeply nested hierarchy:
+        // root/
+        //   zarr.json
+        //   group0/
+        //     zarr.json
+        //     group1/
+        //       zarr.json
+        //       array0/
+        //         zarr.json
+        //         c/0/0
+        //         c/0/1
+        //       array1/
+        //         zarr.json
+        //         c/0/0
+
+        // Create groups
+        store
+            .set(&StoreKey::new("zarr.json")?, group_json.into())
+            .await?;
+        store
+            .set(&StoreKey::new("group0/zarr.json")?, group_json.into())
+            .await?;
+        store
+            .set(
+                &StoreKey::new("group0/group1/zarr.json")?,
+                group_json.into(),
+            )
+            .await?;
+
+        // Create arrays
+        store
+            .set(
+                &StoreKey::new("group0/group1/array0/zarr.json")?,
+                array_json.into(),
+            )
+            .await?;
+        store
+            .set(
+                &StoreKey::new("group0/group1/array0/c/0/0")?,
+                vec![0u8; 20].into(),
+            )
+            .await?;
+        store
+            .set(
+                &StoreKey::new("group0/group1/array0/c/0/1")?,
+                vec![1u8; 20].into(),
+            )
+            .await?;
+
+        store
+            .set(
+                &StoreKey::new("group0/group1/array1/zarr.json")?,
+                array_json.into(),
+            )
+            .await?;
+        store
+            .set(
+                &StoreKey::new("group0/group1/array1/c/0/0")?,
+                vec![2u8; 20].into(),
+            )
+            .await?;
+
+        // Commit the data
+        store
+            .session()
+            .write()
+            .await
+            .commit("Create nested hierarchy", None)
+            .await?;
+
+        // Test list_dir at root
+        let root_items = store.list_dir(&StorePrefix::root()).await?;
+        assert_eq!(root_items.keys().len(), 1); // zarr.json
+        assert_eq!(root_items.prefixes().len(), 1); // group0/
+        assert!(root_items.keys().contains(&StoreKey::new("zarr.json")?));
+        assert!(root_items
+            .prefixes()
+            .contains(&StorePrefix::new("group0/")?));
+
+        // Test list_dir at group0
+        let group0_items = store.list_dir(&StorePrefix::new("group0/")?).await?;
+        assert_eq!(group0_items.keys().len(), 1); // zarr.json
+        assert_eq!(group0_items.prefixes().len(), 1); // group1/
+        assert!(group0_items
+            .keys()
+            .contains(&StoreKey::new("group0/zarr.json")?));
+        assert!(group0_items
+            .prefixes()
+            .contains(&StorePrefix::new("group0/group1/")?));
+
+        // Test list_dir at group1
+        let group1_items = store.list_dir(&StorePrefix::new("group0/group1/")?).await?;
+        assert_eq!(group1_items.keys().len(), 1); // zarr.json
+        assert_eq!(group1_items.prefixes().len(), 2); // array0/, array1/
+        assert!(group1_items
+            .keys()
+            .contains(&StoreKey::new("group0/group1/zarr.json")?));
+        assert!(group1_items
+            .prefixes()
+            .contains(&StorePrefix::new("group0/group1/array0/")?));
+        assert!(group1_items
+            .prefixes()
+            .contains(&StorePrefix::new("group0/group1/array1/")?));
+
+        // Test list_dir inside array0
+        let array0_items = store
+            .list_dir(&StorePrefix::new("group0/group1/array0/")?)
+            .await?;
+        assert_eq!(array0_items.keys().len(), 1); // zarr.json
+        assert_eq!(array0_items.prefixes().len(), 1); // c/
+        assert!(array0_items
+            .keys()
+            .contains(&StoreKey::new("group0/group1/array0/zarr.json")?));
+        assert!(array0_items
+            .prefixes()
+            .contains(&StorePrefix::new("group0/group1/array0/c/")?));
+
+        // Test list_dir inside array0/c/ directory
+        let array0_c_items = store
+            .list_dir(&StorePrefix::new("group0/group1/array0/c/")?)
+            .await?;
+        assert_eq!(array0_c_items.keys().len(), 0); // no direct keys
+        assert_eq!(array0_c_items.prefixes().len(), 1); // 0/
+        assert!(array0_c_items
+            .prefixes()
+            .contains(&StorePrefix::new("group0/group1/array0/c/0/")?));
+
+        // Test list_dir inside array0/c/0/ directory
+        let array0_c0_items = store
+            .list_dir(&StorePrefix::new("group0/group1/array0/c/0/")?)
+            .await?;
+        assert_eq!(array0_c0_items.keys().len(), 2); // 0, 1
+        assert_eq!(array0_c0_items.prefixes().len(), 0); // no subdirectories
+        assert!(array0_c0_items
+            .keys()
+            .contains(&StoreKey::new("group0/group1/array0/c/0/0")?));
+        assert!(array0_c0_items
+            .keys()
+            .contains(&StoreKey::new("group0/group1/array0/c/0/1")?));
+
+        // Test list_prefix at root (should get all keys recursively)
+        let all_keys = store.list_prefix(&StorePrefix::root()).await?;
+        assert_eq!(all_keys.len(), 8); // Total of 8 keys in the hierarchy
+
+        // Test list_prefix at group0
+        let group0_keys = store.list_prefix(&StorePrefix::new("group0/")?).await?;
+        assert_eq!(group0_keys.len(), 7); // All keys under group0/
+
+        // Test list_prefix at group1
+        let group1_keys = store
+            .list_prefix(&StorePrefix::new("group0/group1/")?)
+            .await?;
+        assert_eq!(group1_keys.len(), 6); // zarr.json + 2 arrays with their chunks
+
+        // Test list_prefix for array0 (should get all chunks recursively)
+        let array0_keys = store
+            .list_prefix(&StorePrefix::new("group0/group1/array0/")?)
+            .await?;
+        assert_eq!(array0_keys.len(), 3); // zarr.json + 2 chunks
+        assert!(array0_keys.contains(&StoreKey::new("group0/group1/array0/zarr.json")?));
+        assert!(array0_keys.contains(&StoreKey::new("group0/group1/array0/c/0/0")?));
+        assert!(array0_keys.contains(&StoreKey::new("group0/group1/array0/c/0/1")?));
+
+        // Test list_prefix for array1 (should get all chunks recursively)
+        let array1_keys = store
+            .list_prefix(&StorePrefix::new("group0/group1/array1/")?)
+            .await?;
+        assert_eq!(array1_keys.len(), 2); // zarr.json + 1 chunk
+        assert!(array1_keys.contains(&StoreKey::new("group0/group1/array1/zarr.json")?));
+        assert!(array1_keys.contains(&StoreKey::new("group0/group1/array1/c/0/0")?));
 
         Ok(())
     }
