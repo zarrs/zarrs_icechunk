@@ -2,12 +2,12 @@
 # /// script
 # requires-python = ">=3.12"
 # dependencies = [
-#     "xarray==2025.6.0",
-#     "icechunk==1.0.0",
-#     "virtualizarr[icechunk,hdf]==2.0.0",
-#     "h5netcdf==1.6.3",
-#     "aiohttp==3.12.13",
-#     "requests==2.32.4",
+#     "xarray==2026.2.0",
+#     "icechunk==1.1.21",
+#     "virtualizarr[icechunk,hdf]==2.4.0",
+#     "h5netcdf==1.8.1",
+#     "aiohttp==3.13.3",
+#     "requests==2.32.5",
 # ]
 # ///
 
@@ -41,7 +41,11 @@ combined_vds = open_virtual_mfdataset(
 )
 
 storage = icechunk.local_filesystem_storage("examples/data/test.icechunk.zarr")
-repo = icechunk.Repository.create(storage=storage)
+config = icechunk.RepositoryConfig.default()
+config.set_virtual_chunk_container(
+    icechunk.VirtualChunkContainer("https://github.com/", icechunk.http_store())
+)
+repo = icechunk.Repository.create(storage=storage, config=config)
 session = repo.writable_session(branch="main")
 combined_vds.virtualize.to_icechunk(session.store)
 session.commit("Initial commit")
