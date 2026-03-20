@@ -15,6 +15,10 @@ Icechunk is a transactional store that enables `git`-like version control of Zar
 ## Version Compatibility Matrix
 See [doc/version_compatibility_matrix.md](./doc/version_compatibility_matrix.md).
 
+## MSRV Policy
+The minimum supported Rust version (MSRV) is the MSRV of [`icechunk`](https://crates.io/crates/icechunk).
+The MSRV may be incremented in minor releases.
+
 ## Examples
 ### Basic Usage and Version Control
 ```rust
