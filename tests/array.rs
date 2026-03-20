@@ -48,9 +48,7 @@ async fn icechunk_array() -> Result<(), Box<dyn std::error::Error>> {
     // -----|-----
     // 0  0 | 0  0
     // 0  0 | 0  0
-    array
-        .async_store_chunk(&[0, 0], &[1u8, 2, 0, 0])
-        .await?;
+    array.async_store_chunk(&[0, 0], &[1u8, 2, 0, 0]).await?;
     let snapshot0 = store.session().write().await.commit("a", None).await?;
 
     let session = repo.writable_session("main").await?;
@@ -62,9 +60,7 @@ async fn icechunk_array() -> Result<(), Box<dyn std::error::Error>> {
     // -----|-----
     // 9 10 | 0  0
     // 0  0 | 0  0
-    array
-        .async_store_chunk(&[0, 1], &[3u8, 4, 7, 8])
-        .await?;
+    array.async_store_chunk(&[0, 1], &[3u8, 4, 7, 8]).await?;
     array
         .async_store_array_subset(
             &ArraySubset::new_with_ranges(&[1..3, 0..2]),
