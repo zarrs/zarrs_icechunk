@@ -1,10 +1,7 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, num::NonZeroU64, sync::Arc};
 
 use icechunk::{repository::VersionInfo, Repository, RepositoryConfig};
-use zarrs::{
-    array::{ArrayBuilder, DataType, FillValue},
-    array_subset::ArraySubset,
-};
+use zarrs::array::{data_type, ArrayBuilder, ArraySubset};
 use zarrs_icechunk::AsyncIcechunkStore;
 
 #[tokio::test]
@@ -14,17 +11,18 @@ async fn icechunk_array() -> Result<(), Box<dyn std::error::Error>> {
     let repo = Repository::create(Some(config), storage, HashMap::new()).await?;
 
     let array_path = "/array";
+    let data_type = data_type::uint8();
     let mut builder = ArrayBuilder::new(
         vec![4, 4], // array shape
         vec![2, 2], // regular chunk shape
-        DataType::UInt8,
-        FillValue::from(0u8),
+        data_type.clone(),
+        0u8,
     );
     builder.bytes_to_bytes_codecs(vec![]);
-    // builder.storage_transformers(vec![].into());
     builder.array_to_bytes_codec(Arc::new(
         zarrs::array::codec::array_to_bytes::sharding::ShardingCodecBuilder::new(
-            vec![1, 1].try_into().unwrap(),
+            vec![NonZeroU64::new(1).unwrap(), NonZeroU64::new(1).unwrap()],
+            &data_type,
         )
         .bytes_to_bytes_codecs(vec![Arc::new(zarrs::array::codec::GzipCodec::new(5)?)])
         .build(),
@@ -36,12 +34,12 @@ async fn icechunk_array() -> Result<(), Box<dyn std::error::Error>> {
 
     array.async_store_metadata().await?;
 
-    assert_eq!(array.data_type(), &DataType::UInt8);
+    assert_eq!(array.data_type(), &data_type::uint8());
     assert_eq!(array.fill_value().as_ne_bytes(), &[0u8]);
     assert_eq!(array.shape(), &[4, 4]);
     assert_eq!(
         array.chunk_shape(&[0, 0]).unwrap(),
-        [2, 2].try_into().unwrap()
+        vec![NonZeroU64::new(2).unwrap(), NonZeroU64::new(2).unwrap()]
     );
     assert_eq!(array.chunk_grid_shape(), &[2, 2]);
 
@@ -50,7 +48,9 @@ async fn icechunk_array() -> Result<(), Box<dyn std::error::Error>> {
     // -----|-----
     // 0  0 | 0  0
     // 0  0 | 0  0
-    array.async_store_chunk(&[0, 0], &[1, 2, 0, 0]).await?;
+    array
+        .async_store_chunk(&[0, 0], &[1u8, 2, 0, 0])
+        .await?;
     let snapshot0 = store.session().write().await.commit("a", None).await?;
 
     let session = repo.writable_session("main").await?;
@@ -62,14 +62,22 @@ async fn icechunk_array() -> Result<(), Box<dyn std::error::Error>> {
     // -----|-----
     // 9 10 | 0  0
     // 0  0 | 0  0
-    array.async_store_chunk(&[0, 1], &[3, 4, 7, 8]).await?;
     array
-        .async_store_array_subset(&ArraySubset::new_with_ranges(&[1..3, 0..2]), &[5, 6, 9, 10])
+        .async_store_chunk(&[0, 1], &[3u8, 4, 7, 8])
         .await?;
-    assert!(array.async_retrieve_chunk(&[0, 0, 0]).await.is_err());
+    array
+        .async_store_array_subset(
+            &ArraySubset::new_with_ranges(&[1..3, 0..2]),
+            &[5u8, 6, 9, 10],
+        )
+        .await?;
+    assert!(array
+        .async_retrieve_chunk::<Vec<u8>>(&[0, 0, 0])
+        .await
+        .is_err());
     assert_eq!(
-        array.async_retrieve_chunk(&[0, 0]).await?,
-        vec![1, 2, 5, 6].into()
+        array.async_retrieve_chunk::<Vec<u8>>(&[0, 0]).await?,
+        vec![1u8, 2, 5, 6]
     );
     let _snapshot1 = store.session().write().await.commit("b", None).await?;
 
@@ -80,8 +88,8 @@ async fn icechunk_array() -> Result<(), Box<dyn std::error::Error>> {
     let array = builder.build(store.clone(), array_path).unwrap();
 
     assert_eq!(
-        array.async_retrieve_chunk(&[0, 0]).await?,
-        vec![1, 2, 0, 0].into()
+        array.async_retrieve_chunk::<Vec<u8>>(&[0, 0]).await?,
+        vec![1u8, 2, 0, 0]
     );
 
     Ok(())
