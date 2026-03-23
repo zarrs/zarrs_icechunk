@@ -60,7 +60,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!(
         "{}",
         array
-            .async_retrieve_array_subset_ndarray::<f64>(&array.subset_all())
+            .async_retrieve_array_subset::<ndarray::ArrayD<f64>>(&array.subset_all())
             .await?
             * scale_factor
             + add_offset
