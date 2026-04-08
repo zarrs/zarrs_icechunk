@@ -21,20 +21,20 @@
 //! // Create an icechunk repository
 //! let storage = icechunk::new_in_memory_storage().await?;
 //! let config = RepositoryConfig::default();
-//! let repo = Repository::create(Some(config), storage, HashMap::new()).await?;
+//! let repo = Repository::create(Some(config), storage, Default::default(), Default::default(), true).await?;
 //!
 //! // Do some array/metadata manipulation with zarrs, then commit a snapshot
 //! let session = repo.writable_session("main").await?;
 //! let store = Arc::new(AsyncIcechunkStore::new(session));
 //! # let root_json = StoreKey::new("zarr.json").unwrap();
 //! # store.set(&root_json, r#"{"zarr_format":3,"node_type":"group"}"#.into()).await?;
-//! let snapshot0 = store.session().write().await.commit("Initial commit", None).await?;
+//! let snapshot0 = store.session().write().await.commit("Initial commit").execute().await?;
 //!
 //! // Do some more array/metadata manipulation, then commit another snapshot
 //! let session = repo.writable_session("main").await?;
 //! let store = Arc::new(AsyncIcechunkStore::new(session));
 //! # store.set(&root_json, r#"{"zarr_format":3,"node_type":"group","attributes":{"a":"b"}}"#.into()).await?;
-//! let snapshot1 = store.session().write().await.commit("Update data", None).await?;
+//! let snapshot1 = store.session().write().await.commit("Update data").execute().await?;
 //!
 //! // Checkout the first snapshot
 //! let session = repo.readonly_session(&VersionInfo::SnapshotId(snapshot0)).await?;
@@ -353,7 +353,7 @@ mod tests {
     use icechunk::{repository::VersionInfo, Repository, RepositoryConfig};
 
     use super::*;
-    use std::{collections::HashMap, error::Error};
+    use std::error::Error;
 
     fn remove_whitespace(s: &str) -> String {
         s.chars().filter(|c| !c.is_whitespace()).collect()
@@ -368,7 +368,14 @@ mod tests {
     async fn icechunk() -> Result<(), Box<dyn Error>> {
         let storage = icechunk::new_in_memory_storage().await?;
         let config = RepositoryConfig::default();
-        let repo = Repository::create(Some(config), storage, HashMap::new()).await?;
+        let repo = Repository::create(
+            Some(config),
+            storage,
+            Default::default(),
+            Default::default(),
+            true,
+        )
+        .await?;
         let store = AsyncIcechunkStore::new(repo.writable_session("main").await?);
 
         zarrs_storage::store_test::async_store_write(&store).await?;
@@ -382,7 +389,14 @@ mod tests {
     async fn icechunk_time_travel() -> Result<(), Box<dyn Error>> {
         let storage = icechunk::new_in_memory_storage().await?;
         let config = RepositoryConfig::default();
-        let repo = Repository::create(Some(config), storage, HashMap::new()).await?;
+        let repo = Repository::create(
+            Some(config),
+            storage,
+            Default::default(),
+            Default::default(),
+            true,
+        )
+        .await?;
 
         let json = r#"{
             "zarr_format": 3,
@@ -409,7 +423,8 @@ mod tests {
             .session()
             .write()
             .await
-            .commit("intial commit", None)
+            .commit("intial commit")
+            .execute()
             .await?;
 
         let store = AsyncIcechunkStore::new(repo.writable_session("main").await?);
@@ -418,7 +433,8 @@ mod tests {
             .session()
             .write()
             .await
-            .commit("write attributes", None)
+            .commit("write attributes")
+            .execute()
             .await?;
         assert_eq!(store.get(&root_json).await?, Some(json_updated.into()));
 
@@ -436,7 +452,14 @@ mod tests {
         // Create an icechunk repository with a deeply nested zarr hierarchy
         let storage = icechunk::new_in_memory_storage().await?;
         let config = RepositoryConfig::default();
-        let repo = Repository::create(Some(config), storage, HashMap::new()).await?;
+        let repo = Repository::create(
+            Some(config),
+            storage,
+            Default::default(),
+            Default::default(),
+            true,
+        )
+        .await?;
         let store = AsyncIcechunkStore::new(repo.writable_session("main").await?);
 
         let group_json = r#"{"zarr_format":3,"node_type":"group"}"#;
@@ -509,7 +532,8 @@ mod tests {
             .session()
             .write()
             .await
-            .commit("Create nested hierarchy", None)
+            .commit("Create nested hierarchy")
+            .execute()
             .await?;
 
         // Test list_dir at root

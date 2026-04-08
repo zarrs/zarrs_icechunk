@@ -1,4 +1,4 @@
-use std::{collections::HashMap, num::NonZeroU64, sync::Arc};
+use std::{num::NonZeroU64, sync::Arc};
 
 use icechunk::{repository::VersionInfo, Repository, RepositoryConfig};
 use zarrs::array::{data_type, ArrayBuilder, ArraySubset};
@@ -8,7 +8,14 @@ use zarrs_icechunk::AsyncIcechunkStore;
 async fn icechunk_array() -> Result<(), Box<dyn std::error::Error>> {
     let storage = icechunk::new_in_memory_storage().await?;
     let config = RepositoryConfig::default();
-    let repo = Repository::create(Some(config), storage, HashMap::new()).await?;
+    let repo = Repository::create(
+        Some(config),
+        storage,
+        Default::default(),
+        Default::default(),
+        true,
+    )
+    .await?;
 
     let array_path = "/array";
     let data_type = data_type::uint8();
@@ -49,7 +56,7 @@ async fn icechunk_array() -> Result<(), Box<dyn std::error::Error>> {
     // 0  0 | 0  0
     // 0  0 | 0  0
     array.async_store_chunk(&[0, 0], &[1u8, 2, 0, 0]).await?;
-    let snapshot0 = store.session().write().await.commit("a", None).await?;
+    let snapshot0 = store.session().write().await.commit("a").execute().await?;
 
     let session = repo.writable_session("main").await?;
     let store = Arc::new(AsyncIcechunkStore::new(session));
@@ -75,7 +82,7 @@ async fn icechunk_array() -> Result<(), Box<dyn std::error::Error>> {
         array.async_retrieve_chunk::<Vec<u8>>(&[0, 0]).await?,
         vec![1u8, 2, 5, 6]
     );
-    let _snapshot1 = store.session().write().await.commit("b", None).await?;
+    let _snapshot1 = store.session().write().await.commit("b").execute().await?;
 
     let session = repo
         .readonly_session(&VersionInfo::SnapshotId(snapshot0))
