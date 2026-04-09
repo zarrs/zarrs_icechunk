@@ -17,7 +17,7 @@ import xarray as xr
 import icechunk
 from virtualizarr import open_virtual_mfdataset
 from virtualizarr.parsers import HDFParser
-from virtualizarr.registry import ObjectStoreRegistry
+from obspec_utils.registry import ObjectStoreRegistry
 from obstore.store import HTTPStore
 import warnings
 
