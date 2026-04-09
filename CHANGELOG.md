@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Breaking**: Bump `icechunk` to 2.0.1
+
 ## [0.4.2] - 2026-03-21
 
 ### Changed
