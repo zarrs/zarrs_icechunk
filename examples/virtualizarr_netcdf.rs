@@ -14,13 +14,13 @@ use zarrs_storage::StoreKey;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let storage =
-        icechunk::new_local_filesystem_storage(&Path::new("./examples/data/test.icechunk.zarr"))
+        icechunk::new_local_filesystem_storage(Path::new("./examples/data/test.icechunk.zarr"))
             .await?;
     let mut config = RepositoryConfig::default();
     config.set_virtual_chunk_container(VirtualChunkContainer::new(
         "https://github.com/".to_string(),
         icechunk::ObjectStoreConfig::Http(HashMap::default()),
-    )?);
+    )?)?;
     let repo = Repository::open(
         Some(config),
         storage,
