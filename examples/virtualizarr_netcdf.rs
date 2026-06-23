@@ -19,7 +19,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut config = RepositoryConfig::default();
     config.set_virtual_chunk_container(VirtualChunkContainer::new(
         "https://github.com/".to_string(),
-        icechunk::ObjectStoreConfig::Http(HashMap::default()),
+        icechunk::ObjectStoreConfig::Http(Default::default()),
     )?)?;
     let repo = Repository::open(
         Some(config),
