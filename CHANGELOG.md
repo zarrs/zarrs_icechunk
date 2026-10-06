@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased](https://github.com/zarrs/zarrs_icechunk/compare/v0.5.1...HEAD)
 
+### Changed
+- **Breaking**: Bump `icechunk` to 2.3.0
+- Pin `icechunk` to `~2.3.0`
+  - `icechunk` minor releases can contain breaking changes
+- Bump MSRV to 1.95 in alignment with `icechunk` 2.3.0
+
 ## [0.5.1](https://github.com/zarrs/zarrs_icechunk/releases/tag/v0.5.1) - 2026-06-08
 
 ### Added

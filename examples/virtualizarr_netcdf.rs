@@ -21,12 +21,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
         "https://github.com/".to_string(),
         icechunk::ObjectStoreConfig::Http(Default::default()),
     )?)?;
-    let repo = Repository::open(
-        Some(config),
-        storage,
-        HashMap::from([("https://github.com".to_string(), None)]),
-    )
-    .await?;
+    let repo = Repository::open(storage)
+        .config(config)
+        .authorize_virtual_chunk_access(HashMap::from([("https://github.com".to_string(), None)]))
+        .execute()
+        .await?;
 
     let session = repo
         .readonly_session(&VersionInfo::BranchTipRef("main".to_string()))
