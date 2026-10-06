@@ -309,13 +309,13 @@ impl AsyncListableStorageTraits for AsyncIcechunkStore {
             .map(|item| {
                 match item? {
                     icechunk::store::ListDirItem::Key(key) => {
-                        keys.push(StoreKey::new(format!("{}{}", prefix.as_str(), &key))?);
+                        keys.push(StoreKey::new(format!("{}{}", prefix.as_str(), key))?);
                     }
                     icechunk::store::ListDirItem::Prefix(prefix_inner) => {
                         prefixes.push(StorePrefix::new(format!(
                             "{}{}/",
                             prefix.as_str(),
-                            &prefix_inner
+                            prefix_inner
                         ))?);
                     }
                 }
