@@ -2,24 +2,19 @@
 # /// script
 # requires-python = ">=3.12"
 # dependencies = [
-#     "xarray==2026.2.0",
-#     "icechunk==1.1.21",
-#     "virtualizarr[icechunk,hdf]==2.4.0",
-#     "h5netcdf==1.8.1",
-#     "aiohttp==3.13.3",
-#     "requests==2.32.5",
+#     "icechunk==2.3.0",
+#     "virtualizarr[icechunk,hdf]==2.7.3",
 # ]
 # ///
 
-import os
+import warnings
 
-import xarray as xr
 import icechunk
-from virtualizarr import open_virtual_mfdataset
-from virtualizarr.parsers import HDFParser
+from icechunk.credentials import HttpAccess
 from obspec_utils.registry import ObjectStoreRegistry
 from obstore.store import HTTPStore
-import warnings
+from virtualizarr import open_virtual_mfdataset
+from virtualizarr.parsers import HDFParser
 
 warnings.filterwarnings(
     "ignore",
@@ -45,7 +40,11 @@ config = icechunk.RepositoryConfig.default()
 config.set_virtual_chunk_container(
     icechunk.VirtualChunkContainer("https://github.com/", icechunk.http_store())
 )
-repo = icechunk.Repository.create(storage=storage, config=config)
+repo = icechunk.Repository.create(
+    storage=storage,
+    config=config,
+    authorize_virtual_chunk_access={"https://github.com/": HttpAccess},
+)
 session = repo.writable_session(branch="main")
-combined_vds.virtualize.to_icechunk(session.store)
+combined_vds.vz.to_icechunk(session.store)
 session.commit("Initial commit")
