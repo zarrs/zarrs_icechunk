@@ -3,7 +3,7 @@ name = "zarrs_icechunk"
 version = "0.5.1"
 authors = ["Lachlan Deakin <ljdgit@gmail.com>"]
 edition = "2021"
-rust-version = "1.91"
+rust-version = "1.95"
 description = "icechunk store support for the zarrs crate"
 homepage = "https://zarrs.dev"
 documentation = "https://docs.rs/zarrs_icechunk"
@@ -39,7 +39,7 @@ redirect = ["icechunk/redirect"]
 [dependencies]
 async-trait = "0.1.74"
 futures = "0.3.29"
-icechunk = { version = "2.0.1", default-features = false }
+icechunk = { version = "~2.3.0", default-features = false }
 tokio = "1.34.0"
 zarrs_storage = { version = "0.4.0", features = ["async"] }
 

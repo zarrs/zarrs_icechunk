@@ -21,7 +21,7 @@
 //! // Create an icechunk repository
 //! let storage = icechunk::new_in_memory_storage().await?;
 //! let config = RepositoryConfig::default();
-//! let repo = Repository::create(Some(config), storage, Default::default(), Default::default(), true).await?;
+//! let repo = Repository::create(storage).config(config).execute().await?;
 //!
 //! // Do some array/metadata manipulation with zarrs, then commit a snapshot
 //! let session = repo.writable_session("main").await?;
@@ -309,13 +309,13 @@ impl AsyncListableStorageTraits for AsyncIcechunkStore {
             .map(|item| {
                 match item? {
                     icechunk::store::ListDirItem::Key(key) => {
-                        keys.push(StoreKey::new(format!("{}{}", prefix.as_str(), &key))?);
+                        keys.push(StoreKey::new(format!("{}{}", prefix.as_str(), key))?);
                     }
                     icechunk::store::ListDirItem::Prefix(prefix_inner) => {
                         prefixes.push(StorePrefix::new(format!(
                             "{}{}/",
                             prefix.as_str(),
-                            &prefix_inner
+                            prefix_inner
                         ))?);
                     }
                 }
@@ -368,14 +368,7 @@ mod tests {
     async fn icechunk() -> Result<(), Box<dyn Error>> {
         let storage = icechunk::new_in_memory_storage().await?;
         let config = RepositoryConfig::default();
-        let repo = Repository::create(
-            Some(config),
-            storage,
-            Default::default(),
-            Default::default(),
-            true,
-        )
-        .await?;
+        let repo = Repository::create(storage).config(config).execute().await?;
         let store = AsyncIcechunkStore::new(repo.writable_session("main").await?);
 
         zarrs_storage::store_test::async_store_write(&store).await?;
@@ -389,14 +382,7 @@ mod tests {
     async fn icechunk_time_travel() -> Result<(), Box<dyn Error>> {
         let storage = icechunk::new_in_memory_storage().await?;
         let config = RepositoryConfig::default();
-        let repo = Repository::create(
-            Some(config),
-            storage,
-            Default::default(),
-            Default::default(),
-            true,
-        )
-        .await?;
+        let repo = Repository::create(storage).config(config).execute().await?;
 
         let json = r#"{
             "zarr_format": 3,
@@ -452,14 +438,7 @@ mod tests {
         // Create an icechunk repository with a deeply nested zarr hierarchy
         let storage = icechunk::new_in_memory_storage().await?;
         let config = RepositoryConfig::default();
-        let repo = Repository::create(
-            Some(config),
-            storage,
-            Default::default(),
-            Default::default(),
-            true,
-        )
-        .await?;
+        let repo = Repository::create(storage).config(config).execute().await?;
         let store = AsyncIcechunkStore::new(repo.writable_session("main").await?);
 
         let group_json = r#"{"zarr_format":3,"node_type":"group"}"#;

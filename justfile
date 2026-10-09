@@ -15,7 +15,7 @@ test:
 
 # Generate documentation
 doc:
-	RUSTDOCFLAGS="-D warnings --cfg docsrs" cargo +{{TOOLCHAIN}} doc -Z unstable-options -Z rustdoc-scrape-examples --all-features # --no-deps
+	RUSTDOCFLAGS="-D warnings --cfg docsrs" cargo +{{TOOLCHAIN}} doc -Z unstable-options -Z rustdoc-scrape-examples --all-features --no-deps
 
 # Run clippy linter
 clippy:

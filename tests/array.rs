@@ -8,14 +8,7 @@ use zarrs_icechunk::AsyncIcechunkStore;
 async fn icechunk_array() -> Result<(), Box<dyn std::error::Error>> {
     let storage = icechunk::new_in_memory_storage().await?;
     let config = RepositoryConfig::default();
-    let repo = Repository::create(
-        Some(config),
-        storage,
-        Default::default(),
-        Default::default(),
-        true,
-    )
-    .await?;
+    let repo = Repository::create(storage).config(config).execute().await?;
 
     let array_path = "/array";
     let data_type = data_type::uint8();
