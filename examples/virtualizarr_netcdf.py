@@ -2,13 +2,8 @@
 # /// script
 # requires-python = ">=3.12"
 # dependencies = [
-#     "xarray==2026.9.0",
 #     "icechunk==2.3.0",
 #     "virtualizarr[icechunk,hdf]==2.7.3",
-#     "h5netcdf==1.8.1",
-#     "aiohttp==3.14.4",
-#     "requests==2.34.2",
-#     "zarr==3.4.1",
 # ]
 # ///
 
